@@ -34,6 +34,7 @@ FROM sales s
 RIGHT JOIN products p ON s.product_id = p.product_id
 WHERE s.sale_id IS NULL;
 
+
 //Full outer JOIN
 SELECT c.full_name, p.product_name
 FROM customers c
