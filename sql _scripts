@@ -3,3 +3,65 @@ CREATE TABLE customers (
     full_name VARCHAR(100),
     region VARCHAR(50)
 );
+CREATE TABLE products (
+    product_id SERIAL PRIMARY KEY,
+    product_name VARCHAR(100),
+    price NUMERIC(10,2)
+);
+
+CREATE TABLE sales (
+    sale_id SERIAL PRIMARY KEY,
+    customer_id INT REFERENCES customers(customer_id),
+    product_id INT REFERENCES products(product_id),
+    quantity INT,
+    sale_date DATE
+);
+//Inner JOIN
+SELECT c.full_name, p.product_name, s.quantity
+FROM sales s
+INNER JOIN customers c ON s.customer_id = c.customer_id
+INNER JOIN products p ON s.product_id = p.product_id;
+
+//Left JOIN
+SELECT c.full_name
+FROM customers c
+LEFT JOIN sales s ON c.customer_id = s.customer_id
+WHERE s.sale_id IS NULL;
+
+// Right JOIN
+SELECT p.product_name
+FROM sales s
+RIGHT JOIN products p ON s.product_id = p.product_id
+WHERE s.sale_id IS NULL;
+
+//Full outer JOIN
+SELECT c.full_name, p.product_name
+FROM customers c
+FULL OUTER JOIN sales s ON c.customer_id = s.customer_id
+FULL OUTER JOIN products p ON s.product_id = p.product_id;
+
+//Self JOIN
+SELECT a.full_name, b.full_name, a.region
+FROM customers a
+JOIN customers b
+ON a.region = b.region
+AND a.customer_id <> b.customer_id;
+
+// WINDOW_function_sql
+//Ranking
+SELECT product_id,
+SUM(quantity) AS total_sales,
+RANK() OVER(ORDER BY SUM(quantity) DESC)
+FROM sales
+GROUP BY product_id;
+
+//Running total
+SELECT sale_date,
+SUM(quantity) OVER(ORDER BY sale_date ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW)
+FROM sales;
+
+//customer Segmentation
+SELECT customer_id,
+NTILE(4) OVER(ORDER BY SUM(quantity) DESC)
+FROM sales
+GROUP BY customer_id;
